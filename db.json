@@ -1,0 +1,77 @@
+{
+  "vehicles": [
+    {
+      "name": "mockName1",
+      "pilots": [
+        "http://localhost:5000/people/1/",
+        "http://localhost:5000/people/2/",
+        "http://localhost:5000/people/3/"
+      ],
+      "url": "http://localhost:5000/vehicles/1/"
+    },
+    {
+      "name": "mockName2",
+      "pilots": [
+        "http://localhost:5000/people/4/"
+      ],
+      "url": "http://localhost:5000/vehicles/2/"
+    },
+    {
+      "name": "mockName3",
+      "pilots": [
+        "http://localhost:5000/people/5/",
+        "http://localhost:5000/people/6/"
+      ],
+      "url": "http://localhost:5000/vehicles/3/"
+    }
+  ],
+  "people": [
+    {
+      "name": "Luke Skywalker",
+      "homeworld": "http://localhost:5000/api/planets/1/",
+      "url": "http://localhost:5000/api/people/1/"
+    },
+    {
+      "name": "Leia Organa",
+      "homeworld": "http://localhost:5000/api/planets/1/",
+      "url": "http://localhost:5000/api/people/2/"
+    },
+    {
+      "name": "Han Solo",
+      "homeworld": "http://localhost:5000/api/planets/1/",
+      "url": "http://localhost:5000/api/people/1/"
+    },
+    {
+      "name": "Han Solo",
+      "homeworld": "http://localhost:5000/api/planets/1/",
+      "url": "http://localhost:5000/api/people/1/"
+    }
+  ],
+  "planets": [
+    {
+      "name": "Tatooine",
+      "population": 200000,
+      "url": "http://localhost:5000/api/planets/1/"
+    },
+    {
+      "name": "Alderaan",
+      "population": 2000000000,
+      "url": "http://localhost:5000/api/planets/2/"
+    },
+    {
+      "name": "Naboo",
+      "population": 4500000000,
+      "url": "http://localhost:5000/api/planets/3/"
+    },
+    {
+      "name": "Bespin",
+      "population": 6000000,
+      "url": "http://localhost:5000/api/planets/4/"
+    },
+    {
+      "name": "Endor",
+      "population": 30000000,
+      "url": "http://localhost:5000/api/planets/5/"
+    }
+  ]
+}
