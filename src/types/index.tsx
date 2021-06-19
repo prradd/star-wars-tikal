@@ -11,11 +11,18 @@ export interface Vehicles {
     results?: Array<Vehicle> | [];
 }
 
+export interface People {
+    name: string;
+    url: string;
+    homeworld: string;
+}
+
 export interface VehiclesResult {
     vehicleName: string;
-    homePlanets: Array<{name: string; number: number;}>;
     pilots: Array<string>;
+    homePlanets: Array<{name: string; number: number;}>;
 }
 
 export type FetchData =
-    | VehiclesResult
+    | Vehicles
+    | People

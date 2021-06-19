@@ -4,16 +4,15 @@ import {FetchData, Vehicle, Vehicles, VehiclesResult} from "../types";
 const Table = () => {
     const [error, setError] = useState("");
     const [isLoaded, setIsLoaded] = useState(false);
-    const [vehicles, setVehicles] = useState<Vehicles | []>([]);
-    const [result, setResult] = useState<VehiclesResult | {}>({})
+    const [vehicles, setVehicles] = useState<Vehicles>({});
+    // const [result, setResult] = useState<VehiclesResult | {}>({})
 
-    const SWAPI = "http://localhost:5000/";
+    const SWAPI = "https://swapi.dev/api/";
 
     const fetchData = async (url: string): Promise<FetchData | string> => {
         try {
             const res = await fetch(url);
             const data = await res.json();
-            setIsLoaded(true);
             return data;
         } catch (err) {
             setError(err);
@@ -21,27 +20,33 @@ const Table = () => {
         }
     }
 
+    const pilotSet = new Set();
+
+    const setPilots = (resultsArr: Array<Vehicle>) => {
+        resultsArr.map(pilotsArr => {
+            pilotsArr.pilots.map(pilot => {
+                fetchData(pilot).then((res) => {
+
+                })
+                console.log(pilot);
+                pilotSet.add(pilot)
+            })
+        })
+    }
+
     useEffect (() => {
         fetchData(SWAPI + "vehicles")
-            .then(data => {
-                if (Array.isArray(data)) {
-                    console.log(data[0].url);
-                    setVehicles(data[0].url);
+            .then((data) => {
+                const results = data as Vehicles;
+                if (Array.isArray(results.results)){
+                    setPilots(results.results);
+                    console.log(pilotSet);
                 }
+
             });
     }, [])
 
-    const VehiclesTable = fetchData(SWAPI + "vehicles")
-        .then(data => {
-            if (Array.isArray(data)) {
-                console.log(data[0].url);
-                return data[0].url;
-            } else return null;
-        });
-
-    // do {
-    //
-    // } while (vehicles.next)
+    console.log(pilotSet);
 
     if (error) {
         return <div>Error: {error}</div>;
@@ -50,10 +55,8 @@ const Table = () => {
     } else {
         return (
             <>
-                {vehicles}
+                {Array.isArray(vehicles.results) ? vehicles.results[0].url : null}
             </>
-            // <div>{Array.isArray(vehicles) ? vehicles[0]
-            //     : "null"} </div>
         );
     }
 };
