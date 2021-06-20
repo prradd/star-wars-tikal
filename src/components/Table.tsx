@@ -19,33 +19,32 @@ const Table = () => {
         }
     }
 
-    useEffect (() => {
-        const pilotSet = new Set();
-        const setPilots = (resultsArr: Array<IVehicle>) => {
-            resultsArr.map(pilotsArr => (
-                pilotsArr.pilots.map(pilot => (
-                    fetchData(pilot).then((data) => {
-                        const result = data as IPeople;
-                        const {name, url, homeworld, vehicles} = result;
-                        pilotSet.add({name, url, homeworld, vehicles})
-                    })
-                ))
-            ))
+    useEffect(() => {
+        const vehiclesMap = new Map();
+        const pilotsMap = new Map();
+
+        const mapVehicles = (vehicles: Array<IVehicle> | []) => {
+            vehicles.forEach((vehicle) => {
+                if (vehicle.pilots.length > 0)
+                    vehiclesMap.set(vehicle.url, {name: vehicle.name, pilots: vehicle.pilots})
+            })
         }
-        let count = 0;
+
         let next: string | null = SWAPI + "vehicles";
-        while (next && count < 10) {
-            fetchData(SWAPI + "vehicles")
-                .then((data) => {
-                    const result = data as IVehicles;
-                    if (result.results.length > 0){
-                        setPilots(result.results);
-                    }
-                    next = result.next;
-                });
-            count++
-        };
-        console.log(pilotSet);
+
+
+        while (next !== null) {
+            const result = fetchData(SWAPI + "vehicles").then((result) => {
+                if (typeof result !== "string" && "results" in result) {
+                    mapVehicles(result.results);
+                    if (result.next)
+                        next = result.next;
+                }
+            })
+        }
+
+
+        console.log(vehiclesMap);
 
     }, [])
 

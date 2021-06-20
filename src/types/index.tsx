@@ -7,7 +7,6 @@ export interface IVehicle {
 export interface IVehicles {
     count?: number;
     next: string | null;
-    previous?: string | null;
     results: Array<IVehicle> | [];
 }
 
