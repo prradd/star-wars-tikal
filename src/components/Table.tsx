@@ -3,7 +3,7 @@ import {FetchData, IPeople, IVehicle, IVehicles, IVehiclesResult} from "../types
 
 const SWAPI = "https://swapi.dev/api/";
 
-const Table = () => {
+const Tables = () => {
 
     const [error, setError] = useState("");
     const [isLoaded, setIsLoaded] = useState(false);
@@ -31,17 +31,18 @@ const Table = () => {
         }
 
         let next: string | null = SWAPI + "vehicles";
-
-
-        while (next !== null) {
-            const result = fetchData(SWAPI + "vehicles").then((result) => {
+        (async () => {
+            do {
+                console.log(next);
+                const result: FetchData | string = await fetchData(next);
                 if (typeof result !== "string" && "results" in result) {
                     mapVehicles(result.results);
-                    if (result.next)
-                        next = result.next;
                 }
-            })
-        }
+                if (typeof result !== "string" && "next" in result) {
+                    next = result.next;
+                }
+            } while (next !== null)
+        })();
 
 
         console.log(vehiclesMap);
@@ -62,4 +63,4 @@ const Table = () => {
     }
 };
 
-export default Table;
+export default Tables;
