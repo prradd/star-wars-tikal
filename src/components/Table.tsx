@@ -1,13 +1,12 @@
 import React, {useEffect, useState} from 'react';
-import {FetchData, Vehicle, Vehicles, VehiclesResult} from "../types";
+import {FetchData, IPeople, IVehicle, IVehicles, IVehiclesResult} from "../types";
+
+const SWAPI = "https://swapi.dev/api/";
 
 const Table = () => {
+
     const [error, setError] = useState("");
     const [isLoaded, setIsLoaded] = useState(false);
-    const [vehicles, setVehicles] = useState<Vehicles>({});
-    // const [result, setResult] = useState<VehiclesResult | {}>({})
-
-    const SWAPI = "https://swapi.dev/api/";
 
     const fetchData = async (url: string): Promise<FetchData | string> => {
         try {
@@ -20,33 +19,36 @@ const Table = () => {
         }
     }
 
-    const pilotSet = new Set();
-
-    const setPilots = (resultsArr: Array<Vehicle>) => {
-        resultsArr.map(pilotsArr => {
-            pilotsArr.pilots.map(pilot => {
-                fetchData(pilot).then((res) => {
-
-                })
-                console.log(pilot);
-                pilotSet.add(pilot)
-            })
-        })
-    }
-
     useEffect (() => {
-        fetchData(SWAPI + "vehicles")
-            .then((data) => {
-                const results = data as Vehicles;
-                if (Array.isArray(results.results)){
-                    setPilots(results.results);
-                    console.log(pilotSet);
-                }
+        const pilotSet = new Set();
+        const setPilots = (resultsArr: Array<IVehicle>) => {
+            resultsArr.map(pilotsArr => (
+                pilotsArr.pilots.map(pilot => (
+                    fetchData(pilot).then((data) => {
+                        const result = data as IPeople;
+                        const {name, url, homeworld, vehicles} = result;
+                        pilotSet.add({name, url, homeworld, vehicles})
+                    })
+                ))
+            ))
+        }
+        let count = 0;
+        let next: string | null = SWAPI + "vehicles";
+        while (next && count < 10) {
+            fetchData(SWAPI + "vehicles")
+                .then((data) => {
+                    const result = data as IVehicles;
+                    if (result.results.length > 0){
+                        setPilots(result.results);
+                    }
+                    next = result.next;
+                });
+            count++
+        };
+        console.log(pilotSet);
 
-            });
     }, [])
 
-    console.log(pilotSet);
 
     if (error) {
         return <div>Error: {error}</div>;
@@ -55,7 +57,7 @@ const Table = () => {
     } else {
         return (
             <>
-                {Array.isArray(vehicles.results) ? vehicles.results[0].url : null}
+                {/*{Array.isArray(vehicles.results) ? vehicles.results[0].url : null}*/}
             </>
         );
     }

@@ -1,28 +1,29 @@
-export interface Vehicle {
+export interface IVehicle {
     name: string;
     pilots: Array<string> | [];
     url: string;
 }
 
-export interface Vehicles {
+export interface IVehicles {
     count?: number;
-    next?: string | null;
+    next: string | null;
     previous?: string | null;
-    results?: Array<Vehicle> | [];
+    results: Array<IVehicle> | [];
 }
 
-export interface People {
-    name: string;
-    url: string;
-    homeworld: string;
+export interface IPeople {
+    name?: string;
+    url?: string;
+    homeworld?: string;
+    vehicles?: Array<string>
 }
 
-export interface VehiclesResult {
+export interface IVehiclesResult {
     vehicleName: string;
     pilots: Array<string>;
     homePlanets: Array<{name: string; number: number;}>;
 }
 
 export type FetchData =
-    | Vehicles
-    | People
+    | IVehicles
+    | IPeople
