@@ -12,14 +12,14 @@ export interface IVehicles {
 
 export interface IPeople {
     name?: string;
-    url?: string;
-    homeworld?: string;
+    url: string;
+    homeworld: string;
     vehicles?: Array<string>
 }
 
 export interface IPlanet {
     name?: string;
-    url?: string;
+    url: string;
     population?: string;
 }
 

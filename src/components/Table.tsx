@@ -1,5 +1,5 @@
-import React, {useEffect, useState} from 'react';
-import {FetchData, IPeople, IPlanet, IVehicle, IVehicles, IVehiclesResult} from "../types";
+import React, { useEffect, useState } from 'react';
+import { IPeople, IPlanet, IVehicle, IVehicles } from "../types";
 
 const SWAPI = "https://swapi.dev/api/";
 
@@ -8,11 +8,10 @@ const Tables = () => {
     const [error, setError] = useState("");
     const [isLoaded, setIsLoaded] = useState(false);
 
-    const fetchData = async (url: string): Promise<FetchData | string> => {
+    const fetchData: <T>(url: string) => Promise<T> = async (url: string) => {
         try {
             const res = await fetch(url);
-            const data = await res.json();
-            return data;
+            return await res.json();
         } catch (err) {
             setError(err);
             return err;
@@ -20,59 +19,65 @@ const Tables = () => {
     }
 
     useEffect(() => {
-        const vehiclesMap = new Map();
-        const pilotsMap = new Map();
-        const planetsMap = new Map();
+        const vehiclesMap = new Map<string, IVehicle>();
+        const pilotsMap = new Map<string, IPeople>();
+        const planetsMap = new Map<string, IPlanet>();
 
-        const mapVehicles = (vehicles: Array<IVehicle> | []) => {
-            vehicles.forEach((vehicle) => {
-                if (vehicle.pilots.length > 0)
-                    vehiclesMap.set(vehicle.url, {name: vehicle.name, pilots: vehicle.pilots})
-            })
-        }
-
-        const mapPilots = (pilots: Array<string>) => {
-            if (pilots.length > 0){
-                pilots.map(async (pilotUrl: string) => {
-                    const result: FetchData | string = await fetchData(pilotUrl) as IPeople;
-                    if (typeof result !== "string" && "homeworld" in result) {
-                        const {name, url, homeworld} = result;
-                        pilotsMap.set(url, {name, homeworld});
-                    }
-                })
+        const mapVehicles: (vehicles: Array<IVehicle>, mappedVehicles: Map<string, IVehicle>) => void =
+            (vehicles, mappedVehicles) => {
+                return vehicles
+                    .filter(vehicle => !!vehicle.pilots.length)
+                    .forEach( vehicle => mappedVehicles.set(vehicle.url, vehicle));
             }
-        }
 
-        const mapPlanets = async (planetUrl: string) => {
-            console.log(planetUrl);
-            const result: FetchData | string = await fetchData(planetUrl) as IPlanet;
-            if (typeof result !== "string" && "population" in result) {
-                const {name, url, population} = result;
-                planetsMap.set(url, {name, population});
+        const mapPilots: (pilotUrls: Array<string>, mappedPilots: Map<string, IPeople>) => void =
+            async (pilotUrls, mappedPilots ) => {
+                const promisedPilots = pilotUrls
+                    // remove already fetched pilots and pilots without url
+                    .filter(pilotUrl => !!pilotUrl?.length && !mappedPilots.has(pilotUrl))
+                    // Add promises
+                    .map(pilotUrl => fetchData<IPeople>(pilotUrl))
+
+                // get all the pilots data
+                const pilots = await Promise.all(promisedPilots);
+
+                // Store pilots data
+                pilots.forEach(pilot => mappedPilots.set(pilot.url, pilot))
             }
-        }
 
-        let next: string | null = SWAPI + "vehicles";
+        const mapPlanets: (planetUrls: Array<string>, mappedPlanets: Map<string, IPlanet>) => void =
+            async (planetUrls, mappedPlanets) => {
+                const promisedPlanets = planetUrls
+                    // remove already fetched planets and planets without url
+                    .filter(planetUrl => !!planetUrl?.length && !mappedPlanets.has(planetUrl))
+                    // Add promises
+                    .map(planetUrl => fetchData<IPlanet>(planetUrl))
+
+                // get all the planets data
+                const planets = await Promise.all(promisedPlanets);
+
+                // Store planet data
+                planets.forEach(planet => mappedPlanets.set(planet.url, planet))
+            }
+
+
         (async () => {
+            let next: string | null = SWAPI + "vehicles";
             do {
-                const result: FetchData | string = await fetchData(next);
-                if (typeof result !== "string" && "results" in result) {
-                    mapVehicles(result.results);
-                }
-                if (typeof result !== "string" && "next" in result) {
-                    next = result.next;
-                }
+                const result: IVehicles = await fetchData<IVehicles>(next);
+                mapVehicles(result.results, vehiclesMap);
+                next = result.next;
             } while (next !== null)
-        })().then(() => {
-            vehiclesMap.forEach((value) => {
-                mapPilots(value.pilots);
-            });
-        }).then(() => {
-            pilotsMap.forEach((value) => {
-                console.log(value);
-                mapPlanets(value.homeworld).then(() => {});
-            });
-        });
+
+            for (const value of Array.from(vehiclesMap.values())) {
+                await mapPilots(value.pilots, pilotsMap);
+            }
+
+            for (const value of Array.from(pilotsMap.values())) {
+                mapPlanets([value.homeworld], planetsMap);
+            }
+
+        })().then();
 
         console.log(vehiclesMap);
         console.log(pilotsMap);
@@ -82,13 +87,13 @@ const Tables = () => {
 
 
     if (error) {
-        return <div>Error: {error}</div>;
+        return <div>Error: { error }</div>;
     } else if (!isLoaded) {
         return <div>Loading...</div>;
     } else {
         return (
             <>
-                {/*{Array.isArray(vehicles.results) ? vehicles.results[0].url : null}*/}
+                {/*{Array.isArray(vehicles.results) ? vehicles.results[0].url : null}*/ }
             </>
         );
     }
