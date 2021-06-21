@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {FetchData, IPeople, IVehicle, IVehicles, IVehiclesResult} from "../types";
+import {FetchData, IPeople, IPlanet, IVehicle, IVehicles, IVehiclesResult} from "../types";
 
 const SWAPI = "https://swapi.dev/api/";
 
@@ -22,6 +22,7 @@ const Tables = () => {
     useEffect(() => {
         const vehiclesMap = new Map();
         const pilotsMap = new Map();
+        const planetsMap = new Map();
 
         const mapVehicles = (vehicles: Array<IVehicle> | []) => {
             vehicles.forEach((vehicle) => {
@@ -32,17 +33,28 @@ const Tables = () => {
 
         const mapPilots = (pilots: Array<string>) => {
             if (pilots.length > 0){
-                pilots.map((pilotUrl: string) => {
-                    const result: FetchData | string = await fetchData(pilotUrl); 
+                pilots.map(async (pilotUrl: string) => {
+                    const result: FetchData | string = await fetchData(pilotUrl) as IPeople;
+                    if (typeof result !== "string" && "homeworld" in result) {
+                        const {name, url, homeworld} = result;
+                        pilotsMap.set(url, {name, homeworld});
+                    }
                 })
             }
+        }
 
+        const mapPlanets = async (planetUrl: string) => {
+            console.log(planetUrl);
+            const result: FetchData | string = await fetchData(planetUrl) as IPlanet;
+            if (typeof result !== "string" && "population" in result) {
+                const {name, url, population} = result;
+                planetsMap.set(url, {name, population});
+            }
         }
 
         let next: string | null = SWAPI + "vehicles";
         (async () => {
             do {
-                console.log(next);
                 const result: FetchData | string = await fetchData(next);
                 if (typeof result !== "string" && "results" in result) {
                     mapVehicles(result.results);
@@ -52,13 +64,19 @@ const Tables = () => {
                 }
             } while (next !== null)
         })().then(() => {
-            vehiclesMap.forEach((value, key) => {
-
-            })
+            vehiclesMap.forEach((value) => {
+                mapPilots(value.pilots);
+            });
+        }).then(() => {
+            pilotsMap.forEach((value) => {
+                console.log(value);
+                mapPlanets(value.homeworld).then(() => {});
+            });
         });
 
-
         console.log(vehiclesMap);
+        console.log(pilotsMap);
+        console.log(planetsMap);
 
     }, [])
 

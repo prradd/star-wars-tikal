@@ -17,6 +17,12 @@ export interface IPeople {
     vehicles?: Array<string>
 }
 
+export interface IPlanet {
+    name?: string;
+    url?: string;
+    population?: string;
+}
+
 export interface IVehiclesResult {
     vehicleName: string;
     pilots: Array<string>;
@@ -26,3 +32,4 @@ export interface IVehiclesResult {
 export type FetchData =
     | IVehicles
     | IPeople
+    | IPlanet
