@@ -30,6 +30,15 @@ const Tables = () => {
             })
         }
 
+        const mapPilots = (pilots: Array<string>) => {
+            if (pilots.length > 0){
+                pilots.map((pilotUrl: string) => {
+                    const result: FetchData | string = await fetchData(pilotUrl); 
+                })
+            }
+
+        }
+
         let next: string | null = SWAPI + "vehicles";
         (async () => {
             do {
@@ -42,7 +51,11 @@ const Tables = () => {
                     next = result.next;
                 }
             } while (next !== null)
-        })();
+        })().then(() => {
+            vehiclesMap.forEach((value, key) => {
+
+            })
+        });
 
 
         console.log(vehiclesMap);
