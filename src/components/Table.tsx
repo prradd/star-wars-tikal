@@ -1,65 +1,24 @@
-import React, { useEffect, useState } from 'react';
-import { IPeople, IPlanet, IVehicle, IVehicles } from "../types";
+import React, {useEffect, useState} from 'react';
+import {IPeople, IPlanet, IVehicle, IVehicles, IVehiclesResult} from "../types";
+import {fetchData, mapPilots, mapPlanets, mapVehicles} from "./fetchSwapi";
 
 const SWAPI = "https://swapi.dev/api/";
 
 const Tables = () => {
 
-    const [error, setError] = useState("");
     const [isLoaded, setIsLoaded] = useState(false);
+    const [supVehicle, setSupVehicle] = useState<IVehiclesResult>({
+        vehicleName: "",
+        pilots: [],
+        homePlanets: [],
+        homePlanetsSum: 0
+    })
 
-    const fetchData: <T>(url: string) => Promise<T> = async (url: string) => {
-        try {
-            const res = await fetch(url);
-            return await res.json();
-        } catch (err) {
-            setError(err);
-            return err;
-        }
-    }
 
     useEffect(() => {
         const vehiclesMap = new Map<string, IVehicle>();
         const pilotsMap = new Map<string, IPeople>();
         const planetsMap = new Map<string, IPlanet>();
-
-        const mapVehicles: (vehicles: Array<IVehicle>, mappedVehicles: Map<string, IVehicle>) => void =
-            (vehicles, mappedVehicles) => {
-                return vehicles
-                    .filter(vehicle => !!vehicle.pilots.length)
-                    .forEach( vehicle => mappedVehicles.set(vehicle.url, vehicle));
-            }
-
-        const mapPilots: (pilotUrls: Array<string>, mappedPilots: Map<string, IPeople>) => void =
-            async (pilotUrls, mappedPilots ) => {
-                const promisedPilots = pilotUrls
-                    // remove already fetched pilots and pilots without url
-                    .filter(pilotUrl => !!pilotUrl?.length && !mappedPilots.has(pilotUrl))
-                    // Add promises
-                    .map(pilotUrl => fetchData<IPeople>(pilotUrl))
-
-                // get all the pilots data
-                const pilots = await Promise.all(promisedPilots);
-
-                // Store pilots data
-                pilots.forEach(pilot => mappedPilots.set(pilot.url, pilot))
-            }
-
-        const mapPlanets: (planetUrls: Array<string>, mappedPlanets: Map<string, IPlanet>) => void =
-            async (planetUrls, mappedPlanets) => {
-                const promisedPlanets = planetUrls
-                    // remove already fetched planets and planets without url
-                    .filter(planetUrl => !!planetUrl?.length && !mappedPlanets.has(planetUrl))
-                    // Add promises
-                    .map(planetUrl => fetchData<IPlanet>(planetUrl))
-
-                // get all the planets data
-                const planets = await Promise.all(promisedPlanets);
-
-                // Store planet data
-                planets.forEach(planet => mappedPlanets.set(planet.url, planet))
-            }
-
 
         (async () => {
             let next: string | null = SWAPI + "vehicles";
@@ -74,29 +33,53 @@ const Tables = () => {
             }
 
             for (const value of Array.from(pilotsMap.values())) {
-                mapPlanets([value.homeworld], planetsMap);
+                await mapPlanets([value.homeworld], planetsMap);
             }
 
-        })().then();
+        })().then(() => {
+            // Calculate highest sum of "supporting" population
+            for (const value of Array.from(vehiclesMap.values())) {
+                console.log("value");
+                console.log(value);
+                let sum = 0;
+                const pilots = value.pilots;
+                for (let i = 0; i < pilots.length; i++) {
+                    const homeWorldUrl = pilotsMap.get(pilots[i])?.homeworld;
+                    let homeWorldPop = homeWorldUrl ? planetsMap.get(homeWorldUrl)?.population : 0;
 
-        console.log(vehiclesMap);
-        console.log(pilotsMap);
-        console.log(planetsMap);
+                    if (typeof homeWorldPop === "string") {
+                        homeWorldPop = homeWorldPop ? parseInt(homeWorldPop) : 0
+                    }
+                    sum += homeWorldPop ? homeWorldPop : 0;
+                }
+                if (sum > supVehicle.homePlanetsSum) {
+                    setSupVehicle({
+                        vehicleName: value.name,
+                        pilots: pilots,
+                        homePlanets: [],
+                        homePlanetsSum: sum
+                    })
+                }
+            }
+            setIsLoaded(true);
+            console.log(supVehicle);
 
-    }, [])
+        });
 
 
-    if (error) {
-        return <div>Error: { error }</div>;
-    } else if (!isLoaded) {
+    }, [supVehicle])
+    console.log(supVehicle);
+
+    if (!isLoaded) {
         return <div>Loading...</div>;
     } else {
         return (
-            <>
-                {/*{Array.isArray(vehicles.results) ? vehicles.results[0].url : null}*/ }
-            </>
+            <div>
+                {supVehicle.vehicleName}
+            </div>
         );
     }
-};
+    ;
+}
 
-export default Tables;
+export default Tables

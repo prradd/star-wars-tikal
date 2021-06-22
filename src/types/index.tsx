@@ -20,13 +20,14 @@ export interface IPeople {
 export interface IPlanet {
     name?: string;
     url: string;
-    population?: string;
+    population: string;
 }
 
 export interface IVehiclesResult {
     vehicleName: string;
     pilots: Array<string>;
     homePlanets: Array<{name: string; number: number;}>;
+    homePlanetsSum: number;
 }
 
 export type FetchData =
