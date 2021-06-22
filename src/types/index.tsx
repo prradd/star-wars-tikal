@@ -18,7 +18,7 @@ export interface IPeople {
 }
 
 export interface IPlanet {
-    name?: string;
+    name: string;
     url: string;
     population: string;
 }
@@ -26,7 +26,7 @@ export interface IPlanet {
 export interface IVehiclesResult {
     vehicleName: string;
     pilots: Array<string>;
-    homePlanets: Array<{name: string; number: number;}>;
+    homePlanets: Array<IPlanet | null>;
     homePlanetsSum: number;
 }
 

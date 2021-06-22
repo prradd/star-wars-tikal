@@ -11,7 +11,6 @@ export const fetchData: <T>(url: string) => Promise<T> = async (url: string) => 
 
 export const mapVehicles: (vehicles: Array<IVehicle>, mappedVehicles: Map<string, IVehicle>) => void =
     (vehicles, mappedVehicles) => {
-        console.log(vehicles);
         return vehicles
             .filter(vehicle => vehicle.pilots.length > 0)
             .forEach(vehicle => mappedVehicles.set(vehicle.url, vehicle));
@@ -46,3 +45,6 @@ export const mapPlanets: (planetUrls: Array<string>, mappedPlanets: Map<string, 
         // Store planet data
         planets.forEach(planet => mappedPlanets.set(planet.url, planet))
     }
+
+
+
