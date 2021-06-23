@@ -23,6 +23,13 @@ export interface IPlanet {
     population: string;
 }
 
+export interface IPlanets {
+    count?: number;
+    next: string | null;
+    previous: string | null;
+    results: Array<IPlanet> | [];
+}
+
 export interface IVehiclesResult {
     vehicleName: string;
     pilots: Array<string>;
