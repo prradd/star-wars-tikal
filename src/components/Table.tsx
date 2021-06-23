@@ -110,7 +110,7 @@ const Tables = () => {
 
     const Chart = () => {
         const shownPlanets = planets ? planets : startPlanets;
-        const width = planets ? "9%" : "19%";
+        const width = planets ? "8.2%" : "14%";
         return (
             <>
                 {

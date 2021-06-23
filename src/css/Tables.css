@@ -100,9 +100,11 @@ h3 {
 }
 
 .btn.left {
+    margin-right: 10px;
 }
 
 .btn .right {
+    margin-left: 10px;
 }
 
 @keyframes fade-in {
